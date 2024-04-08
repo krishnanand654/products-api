@@ -3,17 +3,12 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoutes')
 const config = require('./config');
-
-
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-
-
-
-
 
 const connect = async () => {
     try {
@@ -26,6 +21,7 @@ const connect = async () => {
 
 
 app.use('/auth', authRoutes);
+app.use('/products', productRoutes);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
