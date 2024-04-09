@@ -3,7 +3,9 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
-const productRoutes = require('./routes/productRoutes')
+const productRoutes = require('./routes/productRoutes');
+const fileRoutes = require('./routes/fileRoutes');
+
 const config = require('./config');
 
 const app = express();
@@ -19,20 +21,15 @@ const connect = async () => {
     }
 }
 
-
 app.use('/auth', authRoutes);
 app.use('/products', productRoutes);
+app.use('/files', fileRoutes);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something broke!');
 });
 
-
-
 connect();
-
-
-
 
 app.listen(3000, () => console.log("server is running"));
