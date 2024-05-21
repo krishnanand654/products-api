@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const mongoose = require('mongoose');
 
 exports.getAllProducts = async (req, res) => {
     try {
@@ -19,15 +20,20 @@ exports.getProductById = async (req, res) => {
         }
         res.json(product);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: "the id is not given" });
     }
 };
 
 
 exports.createProduct = async (req, res) => {
     try {
+        req.body.image_id = new mongoose.Types.ObjectId(req.body.image_id);
+
+
         const product = await Product.create(req.body);
+
         res.status(201).json(product);
+
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

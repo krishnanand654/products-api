@@ -8,7 +8,7 @@ function generateAccessToken(user) {
 }
 
 function generateRefreshToken(user) {
-    return jwt.sign(user, config.refreshSecretKey, { expiresIn: config.expiresIn });
+    return jwt.sign(user, config.refreshSecretKey, { expiresIn: config.refreshExpiresIn });
 }
 
 exports.register = async (req, res) => {
@@ -21,11 +21,9 @@ exports.register = async (req, res) => {
         res.status(201).json({ message: "User Registration successfull" });
     } catch (error) {
         if (error.code === 11000 && error.keyPattern.username) {
-
             res.status(400).json({ message: 'Username already exists' });
         } else {
-
-            res.status(400).json({ message: error });
+            res.status(400).json({ message: "Email already exist" });
         }
     }
 };
@@ -33,7 +31,6 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
     const { username, password } = req.body;
-    console.log(password);
     try {
         const user = await User.findOne({ username });
         if (!user || !(await user.comparePassword(password))) {
@@ -46,8 +43,8 @@ exports.login = async (req, res) => {
 
         user.refreshToken = refreshToken;
         await user.save();
-
-        res.json({ accessToken, refreshToken });
+        const expiresIn = config.expiresIn
+        res.json({ accessToken, refreshToken, expiresIn });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
