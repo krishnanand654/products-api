@@ -135,19 +135,18 @@ async function updateFile(req, res) {
         const filename = req.file.originalname;
         const fileBuffer = req.file.buffer;
 
-        // Delete the existing file
+
         await bucket.delete(fileId);
 
-        // Upload the new file with the same file_id
+
         const uploadStream = bucket.openUploadStreamWithId(fileId, filename);
         uploadStream.end(fileBuffer);
 
         uploadStream.on('finish', async () => {
-            // Update fs.files with the new file information
+
             await db.collection('fs.files').updateOne({ _id: fileId }, { $set: { filename: filename } });
 
-            // Optionally, update fs.chunks if necessary
-            // await db.collection('fs.chunks').updateMany({ files_id: fileId }, { $set: { filename: filename } });
+
 
             res.json({ "message": "File updated successfully", "fileId": fileId });
         });

@@ -3,6 +3,8 @@ const config = require('../config');
 const User = require('../models/User');
 const uuid = require('uuid');
 
+
+
 function generateAccessToken(user) {
     return jwt.sign(user, config.secretKey, { expiresIn: config.expiresIn });
 }
@@ -29,6 +31,7 @@ exports.register = async (req, res) => {
 };
 
 
+
 exports.login = async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -41,9 +44,17 @@ exports.login = async (req, res) => {
         const refreshToken = generateRefreshToken({ username: user.username });
 
 
+        refreshTokenGlobal = refreshToken;
         user.refreshToken = refreshToken;
         await user.save();
         const expiresIn = config.expiresIn
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            sameSite: 'strict',
+            path: '/'
+        });
+
         res.json({ accessToken, refreshToken, expiresIn });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -52,7 +63,9 @@ exports.login = async (req, res) => {
 
 
 exports.refreshToken = async (req, res) => {
-    const refreshToken = req.body.refreshToken;
+
+    const refreshToken = req.cookies.refreshToken;
+
     if (!refreshToken) {
         return res.status(400).json({ message: 'Refresh token is missing' });
     }
@@ -63,8 +76,16 @@ exports.refreshToken = async (req, res) => {
             return res.status(403).json({ message: 'Invalid refresh token' });
         }
 
-        const accessToken = generateAccessToken({ username: user.username });
-        res.json({ accessToken });
+        jwt.verify(refreshToken, process.env.REFRESH_SECRECT_KEY, (err, decoded) => {
+            if (err) {
+                return res.status(403).json({ message: 'Invalid or expired refresh token' });
+            }
+
+
+            const accessToken = generateAccessToken({ username: user.username });
+            res.json({ accessToken });
+        });
+
     } catch (error) {
         console.error('Error refreshing token:', error);
         res.status(500).json({ message: 'Internal server error' });

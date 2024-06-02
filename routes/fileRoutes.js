@@ -16,7 +16,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
             return;
         }
 
-        console.log('Uploaded file:', req.file);
+
 
         next();
     });
@@ -40,7 +40,7 @@ router.put('/update/:id', (req, res, next) => {
             return;
         }
 
-        console.log('Uploaded file:', req.file);
+
 
         next();
     });
